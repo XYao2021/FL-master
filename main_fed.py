@@ -14,12 +14,12 @@ import time
 import pickle
 
 from Functions import *
-from utils.sampling import mnist_iid, mnist_noniid, cifar_iid
-from utils.options import args_parser
-from models.Update import LocalUpdate
-from models.Nets import MLP, CNNMnist, CNNCifar
-from models.Fed import FedAvg
-from models.test import test_img
+from sampling import mnist_iid, mnist_noniid, cifar_iid
+from options import args_parser
+from Update import LocalUpdate
+from Nets import MLP, CNNMnist, CNNCifar
+from Fed import FedAvg
+from test import test_img
 
 # matplotlib.use('Agg')  # XY: Using Agg(for no GPU condition) mode, just save image, cannot plot it
 if __name__ == '__main__':
