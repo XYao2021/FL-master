@@ -1,13 +1,13 @@
 import socket
 from Functions import *
 import select
-from utils.options import args_parser
+from options import args_parser
 
 args = args_parser()
 HEADER_LENGTH = 10
 PORT = 5050
-# SERVER = "10.17.198.243"
-SERVER = socket.gethostbyname(socket.gethostname())
+SERVER = "127.0.0.1"
+# SERVER = socket.gethostbyname(socket.gethostname())
 # SERVER = "172.16.0.2"
 ADDR = (SERVER, PORT)
 server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -37,8 +37,8 @@ while True:
             if msg_recv is False:
                 continue
             print('msg_recv : ', msg_recv, len(msg_recv), type(msg_recv))
-            weights_recv = pickle.loads(msg_recv)
-            print('weights_recv : ', weights_recv)
+            # weights_recv = pickle.loads(msg_recv)
+            print('msg_recv : ', msg_recv)
             Weights.append(msg_recv)
             print(f'Accepted new connection from {client_address}...')
 
@@ -56,8 +56,8 @@ while True:
                 sockets_list.remove(notified_socket)
                 clients.remove(notified_socket)
                 continue
-            weights_recv = pickle.loads(msg_recv)
-            Weights.append(weights_recv)
+            # weights_recv = pickle.loads(msg_recv)
+            Weights.append(msg_recv)
             print(f'Message received from {notified_socket}...')
             if len(Weights) == threshold:
                 print('[COMPUTING] start weights computing...')
