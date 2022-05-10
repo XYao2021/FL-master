@@ -76,13 +76,16 @@ def FedAvg(w):
 
 def send_msg(sock, msg):
     msg_pickle = pickle.dumps(msg)
+    print('pickle msg length: ', len(msg_pickle))
     sock.sendall(struct.pack(">I", len(msg_pickle)))
-    sock.sendall(msg_pickle)
+    sock.send(msg_pickle)
     print(msg[0], 'sent to', sock.getpeername())
 
 
 def recv_msg(sock, expect_msg_type=None):
     msg_len = struct.unpack(">I", sock.recv(4))[0]
+    print('msg length: ', msg_len)
+    # msg = sock.recv(msg_len)
     msg = sock.recv(msg_len, socket.MSG_WAITALL)
     print('length: ', len(msg))
     msg = pickle.loads(msg)

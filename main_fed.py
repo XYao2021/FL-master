@@ -14,12 +14,12 @@ import time
 import pickle
 
 from Functions import *
-from sampling import mnist_iid, mnist_noniid, cifar_iid
-from options import args_parser
-from Update import LocalUpdate
-from Nets import MLP, CNNMnist, CNNCifar
-from Fed import FedAvg
-from test import test_img
+from utils.sampling import mnist_iid, mnist_noniid, cifar_iid
+from utils.options import args_parser
+from models.Update import LocalUpdate
+from models.Nets import MLP, CNNMnist, CNNCifar
+from models.Fed import FedAvg
+from models.test import test_img
 
 # matplotlib.use('Agg')  # XY: Using Agg(for no GPU condition) mode, just save image, cannot plot it
 if __name__ == '__main__':
@@ -27,11 +27,12 @@ if __name__ == '__main__':
     PORT = 5050
     # SERVER = "10.17.198.243"
     # SERVER = "192.168.0.11"
-    SERVER = "10.17.217.158"
+    # SERVER = "10.17.148.245"
+    SERVER = "127.0.0.1"
     ADDR = (SERVER, PORT)
     client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     client.connect(ADDR)
-    client.setblocking(False)
+    # client.setblocking(False)
 
     # parse args
     args = args_parser()
@@ -130,43 +131,24 @@ if __name__ == '__main__':
         #     w_locals = []
         local = LocalUpdate(args=args, dataset=new_dataset_train, idxs=i_d)  # XY: Each Local update has 10 local iterations
         w, loss = local.train(net=copy.deepcopy(net_glob).to(args.device))
-        # print('w: ', w, type(w), len(w), '\n')
-        msg = []
-        for key in w.keys():
-            msg.append(w[key])
-            # print(w[key], len(w[key]), '\n')
-        # print('msg: ', msg, len(msg))
-        # msg = pickle.dumps(msg)
-        # print('dumps msg: ', len(msg), '\n')
-        # print(f'{iter} loss: ', loss)
-
-        # msg = pickle.dumps(w)
-        # print('msg: ', len(msg), '\n')
-        # msg = struct.pack('>I', len(msg)) + msg
-        # print('msg plus: ', len(msg), '\n')
 
         print('Round {}, Average loss {:.8f}'.format(iter, loss), '\n')
         # loss_train.append(loss_avg)
         loss_train.append(loss)  # Print the loss trend changing along with iteration times
 
-        # XY: Test the model  Original test function cannot be running because Mac don't have GPU mode for cuda (torch.cuda.is_available() = False)
-        # net_glob.load_state_dict(w)
-        # net_glob.eval()
-        # acc_test, loss_test = test_img(net_glob, new_dataset_test, args)
-        # print(iter, acc_test, loss_test, '\n')
-
-        # XY: Socket process
-        # print(msg, len(msg))
-        # send_msg(client, msg)
         send_msg(client, ['MSG_CLIENT_TO_SERVER', w])
         print(f'[WAITING] number {iter} iterations finished and waiting for server {SERVER} response ...', '\n')
-        time.sleep(60)
+        time.sleep(20)
         if True:
             # back_msg = recv_msg(client)
             back_msg = recv_msg(client, 'MSG_SERVER_TO_CLIENT')
             # back_msg = pickle.loads(back_msg)
             print(f'[RECEIVED] Received new weights from server {SERVER} and load weights then start next iteration ... ', '\n')
-            net_glob.load_state_dict(back_msg)
+            net_glob.load_state_dict(back_msg[1])
+            # XY: Test the model  Original test function cannot be running because Mac don't have GPU mode for cuda (torch.cuda.is_available() = False)
+            net_glob.eval()
+            acc_test, loss_test = test_img(net_glob, new_dataset_test, args)
+            print(iter, '[TEST RESULT]: ', acc_test, loss_test, '\n')
         # if args.all_clients:
         #     w_locals[idx] = copy.deepcopy(w)
         # else:
